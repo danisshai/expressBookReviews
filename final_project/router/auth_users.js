@@ -27,15 +27,17 @@ return false;
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
-  return res.status(200).json({message: "Yet to be implemented"});
+    books[req.params.isbn].reviews.reviews.push({username: req.user.username, review: req.body.review})
+    return res.status(200).json({message: "Review posted succesfully"});
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  books[req.params.isbn].reviews.push({username: req.user.username, review: req.body.review})
-  return res.status(200).json({message: "Review posted succesfully"});
+  books[req.params.isbn].reviews.reviews = books[req.params.isbn].reviews.reviews.filter(
+      review => review.username !== req.user.username
+  );
+  return res.status(200).json({message: "Review deleted succesfully"});
 });
 
 module.exports.authenticated = regd_users;
