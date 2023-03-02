@@ -9,12 +9,14 @@ public_users.post("/register", (req,res) => {
   //Write your code here
   username= req.body.username;
   password = req.body.password;
+//   console.log(username, password);
+//   console.log(req.body)
   if(!(username && password)){
-    res.status(400).json({status: "error", message: "check the username  and password"})
+    res.status(400).json({status: "error", message: "missing username or password"})
   }
-  user = users.map(user => user.username == username)
-  if (user > 0) {
-    res.status(400).json({status: "error", message: "Username already taken"}) 
+  let user = users.filter(user => user.username === username)
+  if (user.length > 0) {
+    return res.status(400).json({status: "error", message: "Username already taken"}) 
   }
   users.push({username, password})
   return res.status(200).json({message: `New username created with username: ${username}`});

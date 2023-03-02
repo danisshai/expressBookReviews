@@ -25,18 +25,36 @@ for (let i = 0; i < users.length; i++) {
 return false;
 }
 
+
+
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-    books[req.params.isbn].reviews.reviews.push({username: req.user.username, review: req.body.review})
-    return res.status(200).json({message: "Review posted succesfully"});
-});
+    const username = req.body.username;
+    const password = req.body.password;
+    if (!username || !password) {
+        return res.status(404).json({message: "Error logging in"});
+    }
+   if (authenticatedUser(username,password)) {
+      let accessToken = jwt.sign({
+        data: password
+      }, 'access', { expiresIn: 60 * 60 });
+      req.session.authorization = {
+        accessToken,username
+    }
+    return res.status(200).send("User successfully logged in");
+    } else {
+      return res.status(208).json({message: "Invalid Login. Check username and password"});
+    }});
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  books[req.params.isbn].reviews.reviews = books[req.params.isbn].reviews.reviews.filter(
-      review => review.username !== req.user.username
-  );
+  let review = req.query.review;
+  if (review) {
+      books[req.params.isbn].reviews[req.user.username] = review;
+      return res.status(200).json({message: "Review added/updated succesfully"});
+  }
+  delete books[req.params.isbn].reviews[req.user.username];
   return res.status(200).json({message: "Review deleted succesfully"});
 });
 
